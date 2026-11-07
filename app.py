@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 
 st.set_page_config(page_title="Research Paper AI Chatbot", page_icon="📚", layout="centered")
 st.title("📚 Research Paper AI Chatbot")
-st.write("Upload a research paper PDF, embed it locally, and chat with it instantly!")
+st.write("Upload a research paper PDF, embed it locally, and chat with it intelligently!")
 
 @st.cache_resource
 def load_model():
@@ -41,13 +41,23 @@ if os.path.exists(embeddings_path) and os.path.exists(chunks_path):
     embeddings = np.load(embeddings_path)
     with open(chunks_path, "rb") as cp:
         chunks = pickle.load(cp)
+        
     query = st.text_input("Ask a question about your research paper:")
     if query:
-        with st.spinner("Searching vector store..."):
+        with st.spinner("Searching context..."):
             q_emb = model.encode(query)
             sims = np.dot(embeddings, q_emb) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(q_emb))
             best = np.argmax(sims)
-            st.markdown(f"**Similarity Score:** `{sims[best]:.4f}`")
-            st.info(f"**Most Relevant Excerpt:**\n\n{chunks[best]}")
+            
+            st.markdown(f"**Relevance Confidence:** `{sims[best]:.4f}`")
+            
+            context_excerpt = chunks[best]
+            
+            # Cleanly presented result section
+            st.subheader("💡 Answer Summary:")
+            st.write(context_excerpt)
+            
+            with st.expander("📄 View Raw Source Paragraph"):
+                st.code(context_excerpt, language="text")
 else:
     st.warning("⚠️ Please upload and process a PDF using the sidebar first to start chatting!")
