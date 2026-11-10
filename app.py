@@ -54,7 +54,12 @@ if os.path.exists(embeddings_path) and os.path.exists(chunks_path):
     if query:
         with st.spinner("Finding the best section..."):
             q_emb = model.encode(query)
-            sims = np.dot(embeddings, q_emb) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(q_emb))
+            
+            # Safe normalized cosine similarity calculation
+            embeddings_norm = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
+            q_emb_norm = q_emb / np.linalg.norm(q_emb)
+            sims = np.dot(embeddings_norm, q_emb_norm)
+            
             best = np.argmax(sims)
             
             st.markdown(f"**Relevance Confidence:** `{sims[best]:.4f}`")
