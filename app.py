@@ -31,7 +31,6 @@ if uploaded_file is not None:
             chunks = []
             for page_num, page in enumerate(doc):
                 text = page.get_text("text")
-                # Split page text into cleaner paragraph blocks
                 paragraphs = [p.strip() for p in text.split("\n\n") if len(p.strip()) > 40]
                 for p in paragraphs:
                     chunks.append(f"[Page {page_num + 1}]\n{p}")
