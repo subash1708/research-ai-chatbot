@@ -52,18 +52,20 @@ if os.path.exists(embeddings_path) and os.path.exists(chunks_path):
         
     query = st.text_input("Ask a question about your research paper:")
     if query:
-        with st.spinner("Finding the best section..."):
+        with st.spinner("Searching top matches..."):
             q_emb = model.encode(query)
             
-            # Safe normalized cosine similarity calculation
+            # Safe cosine similarity calculation
             embeddings_norm = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
             q_emb_norm = q_emb / np.linalg.norm(q_emb)
             sims = np.dot(embeddings_norm, q_emb_norm)
             
-            best = np.argmax(sims)
+            # Get top 3 matching indices
+            top_indices = np.argsort(sims)[::-1][:3]
             
-            st.markdown(f"**Relevance Confidence:** `{sims[best]:.4f}`")
-            st.subheader("💡 Most Relevant Section:")
-            st.write(chunks[best])
+            st.subheader("💡 Top 3 Matching Excerpts:")
+            for i, idx in enumerate(top_indices):
+                st.markdown(f"**Match {i+1} (Confidence: `{sims[idx]:.4f}`)**")
+                st.info(chunks[idx])
 else:
     st.warning("⚠️ Please upload and process a PDF using the sidebar first!")
